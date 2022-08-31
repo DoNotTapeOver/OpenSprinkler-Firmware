@@ -67,13 +67,13 @@ extern OpenSprinkler os;
 extern ProgramData pd;
 extern ulong flow_count;
 
-static byte return_code;
+static uint8 return_code;
 static char* get_buffer = NULL;
 
 BufferFiller bfill;
 
 void schedule_all_stations(ulong curr_time);
-void turn_off_station(byte sid, ulong curr_time);
+void turn_off_station(uint8 sid, ulong curr_time);
 void process_dynamic_events(ulong curr_time);
 void check_network(time_t curr_time);
 void check_weather(time_t curr_time);
@@ -158,7 +158,7 @@ void print_json_header(bool bracket=true) {
 	else m_client->write((const uint8_t *)"\r\n", 2);*/
 }
 
-byte findKeyVal (const char *str,char *strbuf, uint16_t maxlen,const char *key,bool key_in_pgm=false,uint8_t *keyfound=NULL) {
+uint8 findKeyVal (const char *str,char *strbuf, uint16_t maxlen,const char *key,bool key_in_pgm=false,uint8_t *keyfound=NULL) {
 	uint8_t found=0;
 #if defined(ESP8266)
 	// for ESP8266: there are two cases:
@@ -266,7 +266,7 @@ void send_packet(bool final=false) {
 #endif
 }
 
-char dec2hexchar(byte dec) {
+char dec2hexchar(uint8 dec) {
 	if(dec<10) return '0'+dec;
 	else return 'A'+(dec-10);
 }
@@ -293,14 +293,14 @@ void server_send_html(String html) {
 	wifi_server->client().stop();
 }
 
-void server_send_result(byte code) {
+void server_send_result(uint8 code) {
 	rewind_ether_buffer();
 	print_json_header(false);
 	bfill.emit_p(PSTR("{\"result\":$D}"), code);
 	server_send_content();
 }
 
-void server_send_result(byte code, const char* item) {
+void server_send_result(uint8 code, const char* item) {
 	rewind_ether_buffer();
 	print_json_header(false);
 	bfill.emit_p(PSTR("{\"result\":$D,\"item\":\"$S\"}"), code, item);
@@ -352,10 +352,10 @@ void append_key_value(String& html, const char* key, const String& value) {
 String get_ap_ssid() {
 	static String ap_ssid;
 	if(!ap_ssid.length()) {
-		byte mac[6];
+		uint8 mac[6];
 		WiFi.macAddress(mac);
 		ap_ssid += "OS_";
-		for(byte i=3;i<6;i++) {
+		for(uint8 i=3;i<6;i++) {
 			ap_ssid += dec2hexchar((mac[i]>>4)&0x0F);
 			ap_ssid += dec2hexchar(mac[i]&0x0F);
 		}
@@ -441,10 +441,10 @@ boolean check_password(char *p)
 	return false;
 }
 
-void server_json_stations_attrib(const char* name, byte *attrib)
+void server_json_stations_attrib(const char* name, uint8 *attrib)
 {
 	bfill.emit_p(PSTR("\"$F\":["), name);
-	for(byte i=0;i<os.nboards;i++) {
+	for(uint8 i=0;i<os.nboards;i++) {
 		bfill.emit_p(PSTR("$D"), attrib[i]);
 		if(i!=os.nboards-1)
 			bfill.emit_p(PSTR(","));
@@ -463,7 +463,7 @@ void server_json_stations_main() {
 	server_json_stations_attrib(PSTR("stn_spe"), os.attrib_spe);
 
 	bfill.emit_p(PSTR("\"snames\":["));
-	byte sid;
+	uint8 sid;
 	for(sid=0;sid<os.nstations;sid++) {
 		os.get_station_name(sid, tmp_buffer);
 		bfill.emit_p(PSTR("\"$S\""), tmp_buffer);
@@ -495,8 +495,8 @@ void server_json_station_special() {
 	rewind_ether_buffer();
 #endif
 
-	byte sid;
-	byte comma=0;
+	uint8 sid;
+	uint8 comma=0;
 	StationData *data = (StationData*)tmp_buffer;
 	print_json_header();
 	for(sid=0;sid<os.nstations;sid++) {
@@ -515,10 +515,10 @@ void server_json_station_special() {
 }
 
 
-void server_change_stations_attrib(char *p, char header, byte *attrib)
+void server_change_stations_attrib(char *p, char header, uint8 *attrib)
 {
 	char tbuf2[5] = {0, 0, 0, 0, 0};
-	byte bid;
+	uint8 bid;
 	tbuf2[0]=header;
 	for(bid=0;bid<os.nboards;bid++) {
 		itoa(bid, tbuf2+1, 10);
@@ -550,7 +550,7 @@ void server_change_stations() {
 	char* p = get_buffer;
 #endif
 	
-	byte sid;
+	uint8 sid;
 	char tbuf2[5] = {'s', 0, 0, 0, 0};
 	// process station names
 	for(sid=0;sid<os.nstations;sid++) {
@@ -583,12 +583,12 @@ void server_change_stations() {
 			// only process GPIO and HTTP stations for OS 2.3, above, and OSPi
 			if(tmp_buffer[0] == STN_TYPE_GPIO) {
 				// check that pin does not clash with OSPi pins
-				byte gpio = (tmp_buffer[1] - '0') * 10 + tmp_buffer[2] - '0';
-				byte activeState = tmp_buffer[3] - '0';
+				uint8 gpio = (tmp_buffer[1] - '0') * 10 + tmp_buffer[2] - '0';
+				uint8 activeState = tmp_buffer[3] - '0';
 
-				byte gpioList[] = PIN_FREE_LIST;
+				uint8 gpioList[] = PIN_FREE_LIST;
 				bool found = false;
-				for (byte i = 0; i < sizeof(gpioList) && found == false; i++) {
+				for (uint8 i = 0; i < sizeof(gpioList) && found == false; i++) {
 					if (gpioList[i] == gpio) found = true;
 				}
 				if (!found || activeState > 1) handle_return(HTML_DATA_OUTOFBOUND);
@@ -635,7 +635,7 @@ uint16_t parse_listdata(char **p) {
 	return (uint16_t)atol(tmp_buffer);
 }
 
-void manual_start_program(byte, byte);
+void manual_start_program(uint8, uint8);
 /** Manual start program
  * Command: /mp?pw=xxx&pid=xxx&uwt=xxx
  *
@@ -661,7 +661,7 @@ void server_manual_program() {
 		handle_return(HTML_DATA_OUTOFBOUND);
 	}
 
-	byte uwt = 0;
+	uint8 uwt = 0;
 	if (findKeyVal(p, tmp_buffer, TMP_BUFFER_SIZE, PSTR("uwt"), true)) {
 		if(tmp_buffer[0]=='1') uwt = 1;
 	}
@@ -710,7 +710,7 @@ void server_change_runonce() {
 	// reset all stations and prepare to run one-time program
 	reset_all_stations_immediate();
 
-	byte sid, bid, s;
+	uint8 sid, bid, s;
 	uint16_t dur;
 	boolean match_found = false;
 	for(sid=0;sid<os.nstations;sid++) {
@@ -821,7 +821,7 @@ void server_change_program() {
 	char *p = get_buffer;
 #endif
 
-	byte i;
+	uint8 i;
 
 	ProgramStruct prog;
 
@@ -915,7 +915,7 @@ void server_change_program() {
 }
 
 void server_json_options_main() {
-	byte oid;
+	uint8 oid;
 	for(oid=0;oid<NUM_IOPTS;oid++) {
 		#if !defined(ARDUINO) // do not send the following parameters for non-Arduino platforms
 		if (oid==IOPT_USE_NTP			|| oid==IOPT_USE_DHCP		 ||
@@ -996,7 +996,7 @@ void server_json_programs_main() {
 
 	bfill.emit_p(PSTR("\"nprogs\":$D,\"nboards\":$D,\"mnp\":$D,\"mnst\":$D,\"pnsize\":$D,\"pd\":["),
 							 pd.nprograms, os.nboards, MAX_NUM_PROGRAMS, MAX_NUM_STARTTIMES, PROGRAM_NAME_SIZE);
-	byte pid, i;
+	uint8 pid, i;
 	ProgramStruct prog;
 	for(pid=0;pid<pd.nprograms;pid++) {
 		pd.read(pid, &prog);
@@ -1004,7 +1004,7 @@ void server_json_programs_main() {
 			pd.drem_to_relative(prog.days);
 		}
 
-		byte bytedata = *(char*)(&prog);
+		uint8 bytedata = *(char*)(&prog);
 		bfill.emit_p(PSTR("[$D,$D,$D,["), bytedata, prog.days[0], prog.days[1]);
 		// start times data
 		for (i=0;i<(MAX_NUM_STARTTIMES-1);i++) {
@@ -1059,7 +1059,7 @@ void server_view_scripturl() {
 }
 
 void server_json_controller_main() {
-	byte bid, sid;
+	uint8 bid, sid;
 	ulong curr_time = os.now_tz();
 	bfill.emit_p(PSTR("\"devt\":$L,\"nbrd\":$D,\"en\":$D,\"sn1\":$D,\"sn2\":$D,\"rd\":$D,\"rdst\":$L,"
 										"\"sunrise\":$D,\"sunset\":$D,\"eip\":$L,\"lwc\":$L,\"lswc\":$L,"
@@ -1087,7 +1087,7 @@ void server_json_controller_main() {
 	bfill.emit_p(PSTR("\"RSSI\":$D,"), (int16_t)WiFi.RSSI());
 #endif
 
-	byte mac[6] = {0};
+	uint8 mac[6] = {0};
 	os.load_hardware_mac(mac, m_server!=NULL);
 	bfill.emit_p(PSTR("\"mac\":\"$X:$X:$X:$X:$X:$X\","), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
@@ -1125,7 +1125,7 @@ void server_json_controller_main() {
 			send_packet();
 		}
 		unsigned long rem = 0;
-		byte qid = pd.station_qid[sid];
+		uint8 qid = pd.station_qid[sid];
 		RuntimeQueueStruct *q = pd.queue + qid;
 		if (qid<255) {
 			rem = (curr_time >= q->st) ? (q->st+q->dur-curr_time) : q->dur;
@@ -1327,10 +1327,10 @@ void server_change_options()
 	// !!! p and bfill share the same buffer, so don't write
 	// to bfill before you are done analyzing the buffer !!!
 	// process option values
-	byte err = 0;
-	byte prev_value;
-	byte max_value;
-	for (byte oid=0; oid<NUM_IOPTS; oid++) {
+	uint8 err = 0;
+	uint8 prev_value;
+	uint8 max_value;
+	for (uint8 oid=0; oid<NUM_IOPTS; oid++) {
 
 		// skip options that cannot be set through /co command
 		if (oid==IOPT_FW_VERSION || oid==IOPT_HW_VERSION || oid==IOPT_SEQUENTIAL_RETIRED ||
@@ -1496,7 +1496,7 @@ void server_change_password() {
 
 void server_json_status_main() {
 	bfill.emit_p(PSTR("\"sn\":["));
-	byte sid;
+	uint8 sid;
 
 	for (sid=0;sid<os.nstations;sid++) {
 		bfill.emit_p(PSTR("$D"), (os.station_bits[(sid>>3)]>>(sid&0x07))&1);
@@ -1544,7 +1544,7 @@ void server_change_manual() {
 		handle_return(HTML_DATA_MISSING);
 	}
 
-	byte en=0;
+	uint8 en=0;
 	if (findKeyVal(p, tmp_buffer, TMP_BUFFER_SIZE, PSTR("en"), true)) {
 		en=atoi(tmp_buffer);
 	} else {
@@ -1566,7 +1566,7 @@ void server_change_manual() {
 				handle_return(HTML_NOT_PERMITTED);
 
 			RuntimeQueueStruct *q = NULL;
-			byte sqi = pd.station_qid[sid];
+			uint8 sqi = pd.station_qid[sid];
 			// check if the station already has a schedule
 			if (sqi!=0xFF) {	// if so, we will overwrite the schedule
 				q = pd.queue+sqi;
@@ -2042,7 +2042,7 @@ void handle_web_request(char *p) {
 		send_packet(true);
 	} else {
 		// server funtion handlers
-		byte i;
+		uint8 i;
 		for(i=0;i<sizeof(urls)/sizeof(URLHandler);i++) {
 			if(pgm_read_byte(_url_keys+2*i)==com[0]
 			 &&pgm_read_byte(_url_keys+2*i+1)==com[1]) {
@@ -2151,13 +2151,13 @@ ulong getNtpTime() {
 		"pool.ntp.org" };
 	static uint8_t sidx = 0;
 		
-	static byte packetBuffer[NTP_PACKET_SIZE];
-	byte ntpip[4] = {
+	static uint8 packetBuffer[NTP_PACKET_SIZE];
+	uint8 ntpip[4] = {
 		os.iopts[IOPT_NTP_IP1],
 		os.iopts[IOPT_NTP_IP2],
 		os.iopts[IOPT_NTP_IP3],
 		os.iopts[IOPT_NTP_IP4]};
-	byte tries=0;
+	uint8 tries=0;
 	ulong gt = 0;
 	while(tries<NTP_NTRIES) {
 		// sendNtpPacket

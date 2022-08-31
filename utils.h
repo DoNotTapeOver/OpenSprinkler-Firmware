@@ -43,15 +43,15 @@ bool file_exists(const char *fname);
 void file_read_block (const char *fname, void *dst, ulong pos, ulong len);
 void file_write_block(const char *fname, const void *src, ulong pos, ulong len);
 void file_copy_block (const char *fname, ulong from, ulong to, ulong len, void *tmp=0);
-byte file_read_byte (const char *fname, ulong pos);
-void file_write_byte(const char *fname, ulong pos, byte v);  
-byte file_cmp_block(const char *fname, const char *buf, ulong pos);
+uint8 file_read_byte (const char *fname, ulong pos);
+void file_write_byte(const char *fname, ulong pos, uint8 v);  
+uint8 file_cmp_block(const char *fname, const char *buf, ulong pos);
 
 // misc. string and time converstion functions
 void strncpy_P0(char* dest, const char* src, int n);
 ulong water_time_resolve(uint16_t v);
-byte water_time_encode_signed(int16_t i);
-int16_t water_time_decode_signed(byte i);
+uint8 water_time_encode_signed(int16_t i);
+int16_t water_time_decode_signed(uint8 i);
 void urlDecode(char *);
 void peel_http_header(char*);
 

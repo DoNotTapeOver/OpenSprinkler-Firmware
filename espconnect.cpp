@@ -26,7 +26,7 @@ const char html_ap_redirect[] PROGMEM = "<h3>WiFi config saved. Now switching to
 String scan_network() {
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect();
-	byte n = WiFi.scanNetworks();
+	uint8 n = WiFi.scanNetworks();
 	String wirelessinfo;
 	if (n>32) n = 32; // limit to 32 ssids max
 	 //Maintain old format of wireless network JSON for mobile app compat

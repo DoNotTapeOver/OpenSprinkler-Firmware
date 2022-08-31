@@ -39,7 +39,7 @@ extern OpenSprinkler os;
 
 char* get_runtime_path() {
 	static char path[PATH_MAX];
-	static byte query = 1;
+	static uint8 query = 1;
 
 	#ifdef __APPLE__
 		strcpy(path, "./");
@@ -183,9 +183,9 @@ void write_to_file(const char *fn, const char *data, ulong size, ulong pos, bool
 	if(!f) return;
 	if(pos) f.seek(pos, SeekSet);
 	if(size==0) {
-		f.write((byte*)" ", 1);  // hack to circumvent SPIFFS bug involving writing empty file
+		f.write((uint8*)" ", 1);  // hack to circumvent SPIFFS bug involving writing empty file
 	} else {
-		f.write((byte*)data, size);
+		f.write((uint8*)data, size);
 	}
 	f.close();
 	
@@ -227,7 +227,7 @@ void read_from_file(const char *fn, char *data, ulong maxsize, ulong pos) {
 		return;  // return with empty string
 	}
 	if(pos)  f.seek(pos, SeekSet);
-	int len = f.read((byte*)data, maxsize);
+	int len = f.read((uint8*)data, maxsize);
 	if(len>0) data[len]=0;
 	if(len==1 && data[0]==' ') data[0] = 0;  // hack to circumvent SPIFFS bug involving writing empty file
 	data[maxsize-1]=0;
@@ -323,7 +323,7 @@ void file_read_block(const char *fn, void *dst, ulong pos, ulong len) {
 	File f = SPIFFS.open(fn, "r");
 	if(f) {
 		f.seek(pos, SeekSet);
-		f.read((byte*)dst, len);
+		f.read((uint8*)dst, len);
 		f.close();
 	}
 
@@ -356,7 +356,7 @@ void file_write_block(const char *fn, const void *src, ulong pos, ulong len) {
 	if(!f) f = SPIFFS.open(fn, "w");
 	if(f) {
 		f.seek(pos, SeekSet);
-		f.write((byte*)src, len);
+		f.write((uint8*)src, len);
 		f.close();
 	}
 
@@ -395,9 +395,9 @@ void file_copy_block(const char *fn, ulong from, ulong to, ulong len, void *tmp)
 	File f = SPIFFS.open(fn, "r+");
 	if(!f) return;
 	f.seek(from, SeekSet);
-	f.read((byte*)tmp, len);
+	f.read((uint8*)tmp, len);
 	f.seek(to, SeekSet);
-	f.write((byte*)tmp, len);
+	f.write((uint8*)tmp, len);
 	f.close();
 
 #elif defined(ARDUINO)
@@ -427,7 +427,7 @@ void file_copy_block(const char *fn, ulong from, ulong to, ulong len, void *tmp)
 }
 
 // compare a block of content
-byte file_cmp_block(const char *fn, const char *buf, ulong pos) {
+uint8 file_cmp_block(const char *fn, const char *buf, ulong pos) {
 #if defined(ESP8266)
 
 	File f = SPIFFS.open(fn, "r");
@@ -475,19 +475,19 @@ byte file_cmp_block(const char *fn, const char *buf, ulong pos) {
 	return 1;
 }
 
-byte file_read_byte(const char *fn, ulong pos) {
-	byte v = 0;
+uint8 file_read_byte(const char *fn, ulong pos) {
+	uint8 v = 0;
 	file_read_block(fn, &v, pos, 1);
 	return v;
 }
 
-void file_write_byte(const char *fn, ulong pos, byte v) {
+void file_write_byte(const char *fn, ulong pos, uint8 v) {
 	file_write_block(fn, &v, pos, 1);
 }
 
 // copy n-character string from program memory with ending 0
 void strncpy_P0(char* dest, const char* src, int n) {
-	byte i;
+	uint8 i;
 	for(i=0;i<n;i++) {
 		*dest=pgm_read_byte(src++);
 		dest++;
@@ -512,7 +512,7 @@ ulong water_time_resolve(uint16_t v) {
 
 // encode a 16-bit signed water time (-600 to 600)
 // to unsigned byte (0 to 240)
-byte water_time_encode_signed(int16_t i) {
+uint8 water_time_encode_signed(int16_t i) {
 	i=(i>600)?600:i;
 	i=(i<-600)?-600:i;
 	return (i+600)/5;
@@ -520,7 +520,7 @@ byte water_time_encode_signed(int16_t i) {
 
 // decode a 8-bit unsigned byte (0 to 240)
 // to a 16-bit signed water time (-600 to 600)
-int16_t water_time_decode_signed(byte i) {
+int16_t water_time_decode_signed(uint8 i) {
 	i=(i>240)?240:i;
 	return ((int16_t)i-120)*5;
 }

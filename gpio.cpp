@@ -30,7 +30,7 @@
 #include <Wire.h>
 #include "defines.h"
 
-byte IOEXP::detectType(uint8_t address) {
+uint8 IOEXP::detectType(uint8_t address) {
 	Wire.beginTransmission(address);
 	if(Wire.endTransmission()!=0) return IOEXP_TYPE_NONEXIST; // this I2C address does not exist
 	
@@ -92,7 +92,7 @@ void PCA9555::shift_out(uint8_t plat, uint8_t pclk, uint8_t pdat, uint8_t v) {
 	for(uint8_t s=0;s<8;s++) {
 		output &= ~(1<<pclk); i2c_write(NXP_OUTPUT_REG, output); // set clock low
 
-		if(v & ((byte)1<<(7-s))) {
+		if(v & ((uint8)1<<(7-s))) {
 			output |= (1<<pdat);
 		} else {
 			output &= ~(1<<pdat);
@@ -144,7 +144,7 @@ void PCF8574::i2c_write(uint8_t reg, uint16_t v) {
 
 extern OpenSprinkler os;
 
-void pinModeExt(byte pin, byte mode) {
+void pinModeExt(uint8 pin, uint8 mode) {
 	if(pin==255) return;
 	if(pin>=IOEXP_PIN) {
 		os.mainio->pinMode(pin-IOEXP_PIN, mode);
@@ -153,14 +153,14 @@ void pinModeExt(byte pin, byte mode) {
 	}
 }
 
-void digitalWriteExt(byte pin, byte value) {
+void digitalWriteExt(uint8 pin, uint8 value) {
 	if(pin==255) return;
 	if(pin>=IOEXP_PIN) {
 
 		os.mainio->digitalWrite(pin-IOEXP_PIN, value);
 	/*
 		// a pin on IO expander
-		byte data=pcf_read(MAIN_I2CADDR);
+		uint8 data=pcf_read(MAIN_I2CADDR);
 		if(value) data|=(1<<(pin-IOEXP_PIN));
 		else		 data&=~(1<<(pin-IOEXP_PIN));
 		data |= MAIN_INPUTMASK; // make sure to enforce 1 for input pins
@@ -170,7 +170,7 @@ void digitalWriteExt(byte pin, byte value) {
 	}
 }
 
-byte digitalReadExt(byte pin) {
+uint8 digitalReadExt(uint8 pin) {
 	if(pin==255) return HIGH;
 	if(pin>=IOEXP_PIN) {
 		return os.mainio->digitalRead(pin-IOEXP_PIN);
@@ -212,7 +212,7 @@ static volatile int		 pinPass = -1 ;
 static pthread_mutex_t pinMutex ;
 
 /** Export gpio pin */
-static byte GPIOExport(int pin) {
+static uint8 GPIOExport(int pin) {
 	char buffer[BUFFER_MAX];
 	int fd, len;
 
@@ -229,7 +229,7 @@ static byte GPIOExport(int pin) {
 }
 
 /** Unexport gpio pin */
-static byte GPIOUnexport(int pin) {
+static uint8 GPIOUnexport(int pin) {
 	char buffer[BUFFER_MAX];
 	int fd, len;
 
@@ -246,7 +246,7 @@ static byte GPIOUnexport(int pin) {
 }
 
 /** Set interrupt edge mode */
-static byte GPIOSetEdge(int pin, const char *edge) {
+static uint8 GPIOSetEdge(int pin, const char *edge) {
 	char path[BUFFER_MAX];
 	int fd, len;
 
@@ -263,7 +263,7 @@ static byte GPIOSetEdge(int pin, const char *edge) {
 }
 
 /** Set pin mode, in or out */
-void pinMode(int pin, byte mode) {
+void pinMode(int pin, uint8 mode) {
 	static const char dir_str[]  = "in\0out";
 
 	char path[BUFFER_MAX];
@@ -318,7 +318,7 @@ void gpio_fd_close(int fd) {
 }
 
 /** Read digital value */
-byte digitalRead(int pin) {
+uint8 digitalRead(int pin) {
 	char value_str[3];
 
 	int fd = gpio_fd_open(pin, O_RDONLY);
@@ -336,7 +336,7 @@ byte digitalRead(int pin) {
 }
 
 /** Write digital value given file descriptor */
-void gpio_write(int fd, byte value) {
+void gpio_write(int fd, uint8 value) {
 	static const char value_str[] = "01";
 
 	if (1 != write(fd, &value_str[LOW==value?0:1], 1)) {
@@ -345,7 +345,7 @@ void gpio_write(int fd, byte value) {
 }
 
 /** Write digital value */
-void digitalWrite(int pin, byte value) {
+void digitalWrite(int pin, uint8 value) {
 	int fd = gpio_fd_open(pin);
 	if (fd < 0) {
 		return;
@@ -449,12 +449,12 @@ void attachInterrupt(int pin, const char* mode, void (*isr)(void)) {
 }
 #else
 
-void pinMode(int pin, byte mode) {}
-void digitalWrite(int pin, byte value) {}
-byte digitalRead(int pin) {return 0;}
+void pinMode(int pin, uint8 mode) {}
+void digitalWrite(int pin, uint8 value) {}
+uint8 digitalRead(int pin) {return 0;}
 void attachInterrupt(int pin, const char* mode, void (*isr)(void)) {}
 int gpio_fd_open(int pin, int mode) {return 0;}
 void gpio_fd_close(int fd) {}
-void gpio_write(int fd, byte value) {}
+void gpio_write(int fd, uint8 value) {}
 
 #endif

@@ -31,10 +31,10 @@
 #endif
 
 // Declare static data members
-byte ProgramData::nprograms = 0;
-byte ProgramData::nqueue = 0;
+uint8 ProgramData::nprograms = 0;
+uint8 ProgramData::nqueue = 0;
 RuntimeQueueStruct ProgramData::queue[RUNTIME_QUEUE_SIZE];
-byte ProgramData::station_qid[MAX_NUM_STATIONS];
+uint8 ProgramData::station_qid[MAX_NUM_STATIONS];
 LogStruct ProgramData::lastrun;
 ulong ProgramData::last_seq_stop_time;
 extern char tmp_buffer[];
@@ -69,7 +69,7 @@ RuntimeQueueStruct* ProgramData::enqueue() {
  * element, therefore removing the requested element.
  */
 // this removes an element from the queue
-void ProgramData::dequeue(byte qid) {
+void ProgramData::dequeue(uint8 qid) {
 	if (qid>=nqueue)	return;
 	if (qid<nqueue-1) {
 		queue[qid] = queue[nqueue-1]; // copy the last element to the dequeud element to fill the space
@@ -96,14 +96,14 @@ void ProgramData::eraseall() {
 }
 
 /** Read a program from program file*/
-void ProgramData::read(byte pid, ProgramStruct *buf) {
+void ProgramData::read(uint8 pid, ProgramStruct *buf) {
 	if (pid >= nprograms) return;
 	// first byte is program counter, so 1+
 	file_read_block(PROG_FILENAME, buf, 1+(ulong)pid*PROGRAMSTRUCT_SIZE, PROGRAMSTRUCT_SIZE);
 }
 
 /** Add a program */
-byte ProgramData::add(ProgramStruct *buf) {
+uint8 ProgramData::add(ProgramStruct *buf) {
 	if (nprograms >= MAX_NUM_PROGRAMS)	return 0;
 	file_write_block(PROG_FILENAME, buf, 1+(ulong)nprograms*PROGRAMSTRUCT_SIZE, PROGRAMSTRUCT_SIZE);
 	nprograms ++;
@@ -112,7 +112,7 @@ byte ProgramData::add(ProgramStruct *buf) {
 }
 
 /** Move a program up (i.e. swap a program with the one above it) */
-void ProgramData::moveup(byte pid) {
+void ProgramData::moveup(uint8 pid) {
 	if(pid >= nprograms || pid == 0) return;
 	// swap program pid-1 and pid
 	ulong pos = 1+(ulong)(pid-1)*PROGRAMSTRUCT_SIZE;
@@ -125,7 +125,7 @@ void ProgramData::moveup(byte pid) {
 }
 
 /** Modify a program */
-byte ProgramData::modify(byte pid, ProgramStruct *buf) {
+uint8 ProgramData::modify(uint8 pid, ProgramStruct *buf) {
 	if (pid >= nprograms)  return 0;
 	ulong pos = 1+(ulong)pid*PROGRAMSTRUCT_SIZE;
 	file_write_block(PROG_FILENAME, buf, pos, PROGRAMSTRUCT_SIZE);
@@ -133,7 +133,7 @@ byte ProgramData::modify(byte pid, ProgramStruct *buf) {
 }
 
 /** Delete program(s) */
-byte ProgramData::del(byte pid) {
+uint8 ProgramData::del(uint8 pid) {
 	if (pid >= nprograms)  return 0;
 	if (nprograms == 0) return 0;
 	ulong pos = 1+(ulong)(pid+1)*PROGRAMSTRUCT_SIZE;
@@ -147,9 +147,9 @@ byte ProgramData::del(byte pid) {
 }
 
 // set the enable bit
-byte ProgramData::set_flagbit(byte pid, byte bid, byte value) {
+uint8 ProgramData::set_flagbit(uint8 pid, uint8 bid, uint8 value) {
 	if (pid >= nprograms)  return 0;
-	byte flag = file_read_byte(PROG_FILENAME, 1+(ulong)pid*PROGRAMSTRUCT_SIZE);
+	uint8 flag = file_read_byte(PROG_FILENAME, 1+(ulong)pid*PROGRAMSTRUCT_SIZE);
 	if(value) flag|=(1<<bid);
 	else flag&=(~(1<<bid));
 	file_write_byte(PROG_FILENAME, 1+(ulong)pid*PROGRAMSTRUCT_SIZE, flag);
@@ -172,22 +172,22 @@ int16_t ProgramStruct::starttime_decode(int16_t t) {
 }
 
 /** Check if a given time matches the program's start day */
-byte ProgramStruct::check_day_match(time_t t) {
+uint8 ProgramStruct::check_day_match(time_t t) {
 
 #if defined(ARDUINO) // get current time from Arduino
-	byte weekday_t = weekday(t);				// weekday ranges from [0,6] within Sunday being 1
-	byte day_t = day(t);
-	byte month_t = month(t);
+	uint8 weekday_t = weekday(t);				// weekday ranges from [0,6] within Sunday being 1
+	uint8 day_t = day(t);
+	uint8 month_t = month(t);
 #else // get current time from RPI/BBB
 	time_t ct = t;
 	struct tm *ti = gmtime(&ct);
-	byte weekday_t = (ti->tm_wday+1)%7;  // tm_wday ranges from [0,6] with Sunday being 0
-	byte day_t = ti->tm_mday;
-	byte month_t = ti->tm_mon+1;	 // tm_mon ranges from [0,11]
+	uint8 weekday_t = (ti->tm_wday+1)%7;  // tm_wday ranges from [0,6] with Sunday being 0
+	uint8 day_t = ti->tm_mday;
+	uint8 month_t = ti->tm_mon+1;	 // tm_mon ranges from [0,11]
 #endif // get current time
 
-	byte wd = (weekday_t+5)%7;
-	byte dt = day_t;
+	uint8 wd = (weekday_t+5)%7;
+	uint8 dt = day_t;
 
 	// check day match
 	switch(type) {
@@ -230,7 +230,7 @@ byte ProgramStruct::check_day_match(time_t t) {
 // Check if a given time matches program's start time
 // this also checks for programs that started the previous
 // day and ran over night
-byte ProgramStruct::check_match(time_t t) {
+uint8 ProgramStruct::check_match(time_t t) {
 
 	// check program enable status
 	if (!enabled) return 0;
@@ -246,7 +246,7 @@ byte ProgramStruct::check_match(time_t t) {
 
 		if (starttime_type) {
 			// given start time type
-			for(byte i=0;i<MAX_NUM_STARTTIMES;i++) {
+			for(uint8 i=0;i<MAX_NUM_STARTTIMES;i++) {
 				if (current_minute == starttime_decode(starttimes[i]))	return 1; // if curren_minute matches any of the given start time, return 1
 			}
 			return 0; // otherwise return 0
@@ -281,19 +281,19 @@ byte ProgramStruct::check_match(time_t t) {
 
 // convert absolute remainder (reference time 1970 01-01) to relative remainder (reference time today)
 // absolute remainder is stored in flash, relative remainder is presented to web
-void ProgramData::drem_to_relative(byte days[2]) {
-	byte rem_abs=days[0];
-	byte inv=days[1];
+void ProgramData::drem_to_relative(uint8 days[2]) {
+	uint8 rem_abs=days[0];
+	uint8 inv=days[1];
 	// todo future: use now_tz()?
-	days[0] = (byte)((rem_abs + inv - (os.now_tz()/SECS_PER_DAY) % inv) % inv);
+	days[0] = (uint8)((rem_abs + inv - (os.now_tz()/SECS_PER_DAY) % inv) % inv);
 }
 
 // relative remainder -> absolute remainder
-void ProgramData::drem_to_absolute(byte days[2]) {
-	byte rem_rel=days[0];
-	byte inv=days[1];
+void ProgramData::drem_to_absolute(uint8 days[2]) {
+	uint8 rem_rel=days[0];
+	uint8 inv=days[1];
 	// todo future: use now_tz()?
-	days[0] = (byte)(((os.now_tz()/SECS_PER_DAY) + rem_rel) % inv);
+	days[0] = (uint8)(((os.now_tz()/SECS_PER_DAY) + rem_rel) % inv);
 }
 
 

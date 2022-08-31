@@ -307,19 +307,19 @@ enum {
 	#define PIN_ETHER_CS       16 // ENC28J60 CS (chip select pin) is 16 on OS 3.2.
 
 	/* To accommodate different OS30 versions, we use software defines pins */ 
-	extern byte PIN_BUTTON_1;
-	extern byte PIN_BUTTON_2;
-	extern byte PIN_BUTTON_3;
-	extern byte PIN_RFRX;
-	extern byte PIN_RFTX;
-	extern byte PIN_BOOST;
-	extern byte PIN_BOOST_EN;
-	extern byte PIN_LATCH_COM;
-	extern byte PIN_LATCH_COMA;
-	extern byte PIN_LATCH_COMK;
-	extern byte PIN_SENSOR1;
-	extern byte PIN_SENSOR2;
-	extern byte PIN_IOEXP_INT;
+	extern uint8 PIN_BUTTON_1;
+	extern uint8 PIN_BUTTON_2;
+	extern uint8 PIN_BUTTON_3;
+	extern uint8 PIN_RFRX;
+	extern uint8 PIN_RFTX;
+	extern uint8 PIN_BOOST;
+	extern uint8 PIN_BOOST_EN;
+	extern uint8 PIN_LATCH_COM;
+	extern uint8 PIN_LATCH_COMA;
+	extern uint8 PIN_LATCH_COMK;
+	extern uint8 PIN_SENSOR1;
+	extern uint8 PIN_SENSOR2;
+	extern uint8 PIN_IOEXP_INT;
 
 	/* Original OS30 pin defines */
 	//#define V0_MAIN_INPUTMASK 0b00001010 // main input pin mask

@@ -34,8 +34,8 @@
 
 /** Log data structure */
 struct LogStruct {
-	byte station;
-	byte program;
+	uint8 station;
+	uint8 program;
 	uint16_t duration;
 	uint32_t endtime;
 };
@@ -55,33 +55,33 @@ struct LogStruct {
 /** Program data structure */
 class ProgramStruct {
 public:
-	byte enabled	:1;  // HIGH means the program is enabled
+	uint8 enabled	:1;  // HIGH means the program is enabled
 	
 	// weather data
-	byte use_weather: 1;
+	uint8 use_weather: 1;
 	
 	// odd/even restriction:
 	// 0->none, 1->odd day (except 31st and Feb 29th)
 	// 2->even day, 3->N/A
-	byte oddeven	 :2;
+	uint8 oddeven	 :2;
 	
 	// schedule type:
 	// 0: weekly, 1->biweekly, 2->monthly, 3->interval
-	byte type			 :2;	
+	uint8 type			 :2;	
 	
 	// starttime type:
 	// 0: repeating (give start time, repeat every, number of repeats)
 	// 1: fixed start time (give arbitrary start times up to MAX_NUM_STARTTIMEs)
-	byte starttime_type: 1;
+	uint8 starttime_type: 1;
 
 	// misc. data
-	byte dummy1: 1;
+	uint8 dummy1: 1;
 	
 	// weekly:	 days[0][0..6] correspond to Monday till Sunday
 	// bi-weekly:days[0][0..6] and [1][0..6] store two weeks
 	// monthly:  days[0][0..5] stores the day of the month (32 means last day of month)
 	// interval: days[0] stores the interval (0 to 255), days[1] stores the starting day remainder (0 to 254)
-	byte days[2];  
+	uint8 days[2];  
 	
 	// When the program is a fixed start time type:
 	//	 up to MAX_NUM_STARTTIMES fixed start times
@@ -102,12 +102,12 @@ public:
 	
 	char name[PROGRAM_NAME_SIZE];
 
-	byte check_match(time_t t);
+	uint8 check_match(time_t t);
 	int16_t starttime_decode(int16_t t);
 	
 protected:
 
-	byte check_day_match(time_t t);
+	uint8 check_day_match(time_t t);
 
 };
 
@@ -117,33 +117,33 @@ class RuntimeQueueStruct {
 public:
 	ulong		 st;	// start time
 	uint16_t dur; // water time
-	byte	sid;
-	byte	pid;
+	uint8	sid;
+	uint8	pid;
 };
 
 class ProgramData {
 public:  
 	static RuntimeQueueStruct queue[];
-	static byte nqueue;					// number of queue elements
-	static byte station_qid[];	// this array stores the queue element index for each scheduled station
-	static byte nprograms;			// number of programs
+	static uint8 nqueue;					// number of queue elements
+	static uint8 station_qid[];	// this array stores the queue element index for each scheduled station
+	static uint8 nprograms;			// number of programs
 	static LogStruct lastrun;
 	static ulong last_seq_stop_time;	// the last stop time of a sequential station
 	
 	static void reset_runtime();
 	static RuntimeQueueStruct* enqueue(); // this returns a pointer to the next available slot in the queue
-	static void dequeue(byte qid);	// this removes an element from the queue
+	static void dequeue(uint8 qid);	// this removes an element from the queue
 
 	static void init();
 	static void eraseall();
-	static void read(byte pid, ProgramStruct *buf);
-	static byte add(ProgramStruct *buf);
-	static byte modify(byte pid, ProgramStruct *buf);
-	static byte set_flagbit(byte pid, byte bid, byte value);
-	static void moveup(byte pid);  
-	static byte del(byte pid);
-	static void drem_to_relative(byte days[2]); // absolute to relative reminder conversion
-	static void drem_to_absolute(byte days[2]);
+	static void read(uint8 pid, ProgramStruct *buf);
+	static uint8 add(ProgramStruct *buf);
+	static uint8 modify(uint8 pid, ProgramStruct *buf);
+	static uint8 set_flagbit(uint8 pid, uint8 bid, uint8 value);
+	static void moveup(uint8 pid);  
+	static uint8 del(uint8 pid);
+	static void drem_to_relative(uint8 days[2]); // absolute to relative reminder conversion
+	static void drem_to_absolute(uint8 days[2]);
 private:	
 	static void load_count();
 	static void save_count();

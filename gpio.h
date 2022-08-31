@@ -71,7 +71,7 @@ public:
 		i2c_write(NXP_OUTPUT_REG, values);
 	}
 
-	static byte detectType(uint8_t address);
+	static uint8 detectType(uint8_t address);
 	uint8_t address;
 	uint8_t type;
 };
@@ -109,12 +109,12 @@ private:
 	uint8_t inputmask = 0;	// mask bits for input pins
 };
 
-//void pcf_write(int addr, byte data);
-//byte pcf_read(int addr);
+//void pcf_write(int addr, uint8 data);
+//uint8 pcf_read(int addr);
 //void pcf_write16(int addr, uint16_t data);
-void pinModeExt(byte pin, byte mode);
-void digitalWriteExt(byte pin, byte value);
-byte digitalReadExt(byte pin);
+void pinModeExt(uint8 pin, uint8 mode);
+void digitalWriteExt(uint8 pin, uint8 value);
+uint8 digitalReadExt(uint8 pin);
 
 #endif	// ESP8266
 
@@ -137,12 +137,12 @@ byte digitalReadExt(byte pin);
 #define HIGH	 1
 #define LOW		 0
 
-void pinMode(int pin, byte mode);
-void digitalWrite(int pin, byte value);
+void pinMode(int pin, uint8 mode);
+void digitalWrite(int pin, uint8 value);
 int gpio_fd_open(int pin, int mode = O_WRONLY);
 void gpio_fd_close(int fd);
-void gpio_write(int fd, byte value);
-byte digitalRead(int pin);
+void gpio_write(int fd, uint8 value);
+uint8 digitalRead(int pin);
 // mode can be any of 'rising', 'falling', 'both'
 void attachInterrupt(int pin, const char* mode, void (*isr)(void));
 
